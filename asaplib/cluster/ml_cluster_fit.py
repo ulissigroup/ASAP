@@ -40,11 +40,16 @@ class DBCluster(ClusterBase):
         self.n_noise = list(self.labels).count(-1)
         print('Estimated number of clusters: %d' % self.n_clusters)
         print('Estimated number of noise points: %d' % self.n_noise)
-
-        if np.shape(dmatrix)[0] == np.shape(dmatrix)[1]:
-            silscore = silhouette_score(dmatrix, self.labels, metric="precomputed")
-        else:
-            silscore = silhouette_score(dmatrix, self.labels, metric="euclidean")
+        try:
+            if np.shape(dmatrix)[0] == np.shape(dmatrix)[1]:
+                silscore = silhouette_score(dmatrix, self.labels, metric="precomputed")
+            else:
+                silscore = silhouette_score(dmatrix, self.labels, metric="euclidean")
+        except ValueError:
+            # egde case where the number of samples equals number of unique label, no clusters
+            # in this case, set the score to -1 where each sample is a label
+            # TODO: a better fix
+            silscore = -1
         print("Silhouette Coefficient: %0.3f" % silscore)
 
     def get_cluster_labels(self, index=[]):
